@@ -12,8 +12,6 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
-  // Utility Method to turn Array into Object
-  static transFormData(data) {}
   /**
    * Fetch all restaurants.
    */
@@ -171,7 +169,8 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return `/img/${restaurant.photograph}`;
+    console.log(restaurant.photograph);
+    return `img/${restaurant.id}.jpg`;
   }
 
   /**

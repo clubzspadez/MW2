@@ -8,7 +8,7 @@
   <!-- Normalize.css for better cross-browser consistency -->
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <!-- Main CSS file -->
-  <link rel="stylesheet" href="css/styles.css" type="text/css">
+  <link rel="stylesheet" href="dist/css/styles.css" type="text/css">
   <title>Restaurant Info</title>
 </head>
 
@@ -71,10 +71,22 @@
   <!-- End footer -->
 
   <!-- Beginning scripts -->
+  <script>
+    registerWorker = () => {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then(registration => {
+            console.log("Registration successful, scope is:", registration.scope);
+          })
+          .catch(err => {
+            console.log("Service worker registration failed, error: ", err);
+          });
+      }
+    }
+  </script>
   <!-- Database helpers -->
-  <script type="text/javascript" src="js/dbhelper.js"></script>
-  <!-- Main javascript file -->
-  <script type="text/javascript" src="js/restaurant_info.js"></script>
+  <script type="application/javascript" charset="utf-8" src="dist/js/restaurant.min.js"></script>
   <!-- Google Maps -->
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjFcGaKBWUYhTwZRtQOngh7OhRl8-4vOc&libraries=places&callback=initMap"></script>
   <!-- End scripts -->
