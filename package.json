@@ -10,11 +10,23 @@
   "license": "ISC",
   "devDependencies": {
     "browser-sync": "^2.24.6",
+    "cssnano": "^4.0.4",
+    "del": "^3.0.0",
     "gulp": "^4.0.0",
-    "gulp-autoprefixer": "^5.0.0"
+    "gulp-autoprefixer": "^5.0.0",
+    "gulp-clean-css": "^3.9.4",
+    "gulp-concat": "^2.6.1",
+    "gulp-load-plugins": "^1.5.0",
+    "gulp-uglify": "^3.0.1",
+    "gulp-uglify-es": "^1.0.4",
+    "run-sequence": "^2.2.1",
+    "wiredep": "^4.0.0"
   },
   "dependencies": {
     "gulp-eslint": "^5.0.0",
-    "gulp-sass": "^4.0.1"
+    "gulp-filter": "^5.1.0",
+    "gulp-pug": "^4.0.1",
+    "gulp-sass": "^4.0.1",
+    "gulp-util": "^3.0.8"
   }
 }
