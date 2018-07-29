@@ -7,6 +7,8 @@ const sass = require("gulp-sass");
 const concat = require("gulp-concat");
 const babel = require("gulp-babel");
 const sourcemap = require("gulp-sourcemaps");
+const imageminPngquant = require("imagemin-pngquant");
+const imagemin = require("gulp-imagemin");
 
 const styleSRC = {
   dir: "sass/*.scss",
@@ -18,7 +20,7 @@ const javascriptSRC = {
   dirForRestaurantPage: ["js/dbhelper.js", "js/restaurant_info.js"],
   dist: "dist/js"
 };
-
+// --------------------------------------------- Sass 2 CSS & minify
 gulp.task("minify:sass2css", function() {
   return gulp
     .src(styleSRC.dir)
@@ -32,7 +34,7 @@ gulp.task("minify:sass2css", function() {
     .pipe(cleanCSS({ compatibility: "ie8" }))
     .pipe(gulp.dest(styleSRC.dist));
 });
-
+// --------------------------------------------- Minify JS and concact for files necessary on INDEX
 gulp.task("minifyjs:index", () => {
   return gulp
     .src(javascriptSRC.dirForIndexPage)
@@ -47,6 +49,7 @@ gulp.task("minifyjs:index", () => {
     .pipe(gulp.dest(javascriptSRC.dist));
 });
 
+// --------------------------------------------- Minify JS and concact for files necessary on Restaurant
 gulp.task("minifyjs:restaurant", () => {
   return gulp
     .src(javascriptSRC.dirForRestaurantPage)
@@ -61,11 +64,32 @@ gulp.task("minifyjs:restaurant", () => {
     .pipe(gulp.dest(javascriptSRC.dist));
 });
 
+// --------------------------------------------- Optimize Images
+gulp.task("imageOpt", () => {
+  return gulp
+    .src("img/*")
+    .pipe(
+      imagemin({
+        progressive: true,
+        optimizationLevel: 5,
+        use: [imageminPngquant()]
+      })
+    )
+    .pipe(gulp.dest("dist/img"));
+});
+
+// --------------------------------------------- Default
 gulp.task(
   "default",
-  gulp.parallel("minify:sass2css", "minifyjs:index", "minifyjs:restaurant")
+  gulp.parallel(
+    "minify:sass2css",
+    "minifyjs:index",
+    "minifyjs:restaurant",
+    "imageOpt"
+  )
 );
 
+// --------------------------------------------- Watch these files for changes/updates
 gulp.task("watch", () => {
   gulp.watch(styleSRC.dir, gulp.series("minify:sass2css"));
   gulp.watch(javascriptSRC.dirForIndexPage, gulp.series("minifyjs:index"));
