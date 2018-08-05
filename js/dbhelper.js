@@ -1,4 +1,3 @@
-import idb from "idb";
 /**
  * Common database helper functions.
  */
@@ -24,6 +23,23 @@ class DBHelper {
         } else {
           res.json().then(data => {
             const restaurants = data;
+            const dbPromise = idb.open("restv1Db", 1, upgradeDB => {
+              switch (upgradeDB.oldVersion) {
+                case 0:
+                  upgradeDB.createObjectStore("restaurants", {
+                    keyPath: "id"
+                  });
+              }
+            });
+            dbPromise.then(db => {
+              // open transaction
+              const tx = db.transaction("restaurant", "readwrite");
+              const store = tx.objectStore("restaurants");
+              restaurants.forEach(restaurant => {
+                store.put(restaurant);
+              });
+              return store.getAll();
+            });
             callback(null, restaurants);
           });
         }
