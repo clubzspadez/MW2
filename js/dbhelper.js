@@ -12,6 +12,36 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
+  static openDb() {
+    return idb.open("restv1Db", 1, upgradeDB => {
+      upgradeDB.createObjectStore("restaurants", {
+        keyPath: "id"
+      });
+    });
+  }
+
+  static addRest() {
+    const dbPromise = DBHelper.openDb();
+    fetch(DBHelper.DATABASE_URL)
+      .then(res => res.json())
+      .then(restaurants => {
+        dbPromise.then(db => {
+          let tx = db.transaction("restaurant", "readwrite");
+          let store = tx.objectStore("restaurants");
+          restaurants.forEach(restaurant => {
+            store.put(restaurant);
+          });
+        });
+        callback(null, restaurants);
+      })
+      .catch(err => {
+        dbPromise.then(db => {
+          let store = db.transaction("restaurants").objectStore("restaurants");
+          return store.getAll();
+        });
+      });
+  }
+
   /**
    * Fetch all restaurants.
    */
@@ -23,23 +53,6 @@ class DBHelper {
         } else {
           res.json().then(data => {
             const restaurants = data;
-            const dbPromise = idb.open("restv1Db", 1, upgradeDB => {
-              switch (upgradeDB.oldVersion) {
-                case 0:
-                  upgradeDB.createObjectStore("restaurants", {
-                    keyPath: "id"
-                  });
-              }
-            });
-            dbPromise.then(db => {
-              // open transaction
-              const tx = db.transaction("restaurant", "readwrite");
-              const store = tx.objectStore("restaurants");
-              restaurants.forEach(restaurant => {
-                store.put(restaurant);
-              });
-              return store.getAll();
-            });
             callback(null, restaurants);
           });
         }

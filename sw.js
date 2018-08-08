@@ -34,7 +34,7 @@ self.addEventListener("fetch", function(event) {
   const url = new URL(event.request.url).host;
   // console.log(event.request.url);
   // const pathName = url.pathname("/restaurants");
-  if (url === "localhost:1337") console.log("This is the servers host");
+  if (event.request.method != "GET") return;
 
   // with the current fetch event respond with
   // response

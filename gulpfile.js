@@ -9,7 +9,7 @@ const babel = require("gulp-babel");
 const sourcemap = require("gulp-sourcemaps");
 const imageminPngquant = require("imagemin-pngquant");
 const imagemin = require("gulp-imagemin");
-
+const browserSync = require("browser-sync").create();
 const styleSRC = {
   dir: "sass/*.scss",
   dist: "dist/css"
@@ -32,7 +32,8 @@ gulp.task("minify:sass2css", function() {
       })
     )
     .pipe(cleanCSS({ compatibility: "ie8" }))
-    .pipe(gulp.dest(styleSRC.dist));
+    .pipe(gulp.dest(styleSRC.dist))
+    .pipe(browserSync.stream());
 });
 // --------------------------------------------- Minify JS and concact for files necessary on INDEX
 gulp.task("minifyjs:index", () => {
@@ -88,6 +89,22 @@ gulp.task(
     "imageOpt"
   )
 );
+
+// --------------------------------------------- Serve
+
+// gulp.task("serve", ["minify:sass2css"], function() {
+//   browserSync.init({
+//     server: "./",
+//     browser: "google chrome"
+//   });
+
+//   gulp.watch(styleSRC.dir, gulp.series("minify:sass2css"));
+//   gulp.watch(javascriptSRC.dirForIndexPage, gulp.series("minifyjs:index"));
+//   gulp.watch(
+//     javascriptSRC.dirForRestaurantPage,
+//     gulp.series("minifyjs:restaurant")
+//   );
+// });
 
 // --------------------------------------------- Watch these files for changes/updates
 gulp.task("watch", () => {
