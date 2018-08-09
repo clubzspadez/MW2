@@ -17,7 +17,11 @@ const styleSRC = {
 
 const javascriptSRC = {
   dirForIndexPage: ["js/dbhelper.js", "js/main.js"],
-  dirForRestaurantPage: ["js/dbhelper.js", "js/restaurant_info.js"],
+  dirForRestaurantPage: [
+    "js/dbhelper.js",
+    "js/restaurant_info.js",
+    "js/main.js"
+  ],
   dist: "dist/js"
 };
 // --------------------------------------------- Sass 2 CSS & minify

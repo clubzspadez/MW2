@@ -13,7 +13,7 @@ class DBHelper {
   }
 
   static openDb() {
-    return idb.open("restv1Db", 1, upgradeDB => {
+    return idb.open("restaurant-rev", 1, upgradeDB => {
       upgradeDB.createObjectStore("restaurants", {
         keyPath: "id"
       });
@@ -23,11 +23,13 @@ class DBHelper {
   // add restaurants to opened IDB
   static addRest() {
     dbPromise = DBHelper.openDb();
+    console.log(dbPromise);
     fetch(DBHelper.DATABASE_URL)
       .then(res => res.json())
       .then(restaurants => {
+        console.log(dbPromise);
         dbPromise.then(db => {
-          let tx = db.transaction("restaurant", "readwrite");
+          let tx = db.transaction("restaurants", "readwrite");
           let store = tx.objectStore("restaurants");
           restaurants.forEach(restaurant => {
             store.put(restaurant);
@@ -105,31 +107,35 @@ class DBHelper {
     // fetch all restaurants with proper error handling.
     // returns instance of a restaurant object from the array
     let restaurant = DBHelper.getID(id);
-    restaurant.then(restaurant => {
-      // if we have valid response pass to callback
-      if (restaurant) {
-        callback(null, restaurant);
-        return;
-      } else {
-        // fetch from not work if we dont have response
-        DBHelper.fetchRestaurants((error, restaurants) => {
-          if (error) {
-            callback(error, null);
-          } else {
-            const restaurant = restaurants.find(
-              (obj, index) => obj["id"] === index + 1
-            );
-            if (restaurant) {
-              // Got the restaurant
-              callback(null, restaurant);
+    restaurant
+      .then(restaurant => {
+        // if we have valid response pass to callback
+        if (restaurant) {
+          callback(null, restaurant);
+          return;
+        } else {
+          // fetch from not work if we dont have response
+          DBHelper.fetchRestaurants((error, restaurants) => {
+            if (error) {
+              callback(error, null);
             } else {
-              // Restaurant does not exist in the database
-              callback("Restaurant does not exist", null);
+              const restaurant = restaurants.find(
+                (obj, index) => obj["id"] === index + 1
+              );
+              if (restaurant) {
+                // Got the restaurant
+                callback(null, restaurant);
+              } else {
+                // Restaurant does not exist in the database
+                callback("Restaurant does not exist", null);
+              }
             }
-          }
-        });
-      }
-    });
+          });
+        }
+      })
+      .catch(err => {
+        callback(err, null);
+      });
   }
 
   /**
