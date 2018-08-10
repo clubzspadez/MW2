@@ -41,6 +41,7 @@ class DBHelper {
         dbPromise.then(db => {
           let tx = db.transaction("restaurants");
           let store = tx.objectStore("restaurants");
+          console.log(store.getAll());
           return store.getAll();
         });
       });
@@ -80,18 +81,16 @@ class DBHelper {
   static fetchRestaurants(callback) {
     // callback will get instance of restaurants
     DBHelper.addRest(callback);
+    console.log(restaurants);
     // if no restaurants fetch from server
     if (!restaurants) {
       fetch(DBHelper.DATABASE_URL)
         .then(res => {
-          if (!res) {
-            return;
-          } else {
-            res.json().then(data => {
-              const restaurants = data;
-              callback(null, restaurants);
-            });
-          }
+          return res.json();
+        })
+        .then(data => {
+          const restaurants = data;
+          callback(null, restaurants);
         })
         .catch(err => {
           callback(err, null);
@@ -107,35 +106,31 @@ class DBHelper {
     // fetch all restaurants with proper error handling.
     // returns instance of a restaurant object from the array
     let restaurant = DBHelper.getID(id);
-    restaurant
-      .then(restaurant => {
-        // if we have valid response pass to callback
-        if (restaurant) {
-          callback(null, restaurant);
-          return;
-        } else {
-          // fetch from not work if we dont have response
-          DBHelper.fetchRestaurants((error, restaurants) => {
-            if (error) {
-              callback(error, null);
+    restaurant.then(restaurant => {
+      // if we have valid response pass to callback
+      if (restaurant) {
+        callback(null, restaurant);
+        return;
+      } else {
+        // fetch from not work if we dont have response
+        DBHelper.fetchRestaurants((error, restaurants) => {
+          if (error) {
+            callback(error, null);
+          } else {
+            const restaurant = restaurants.find(
+              (obj, index) => obj["id"] === index + 1
+            );
+            if (restaurant) {
+              // Got the restaurant
+              callback(null, restaurant);
             } else {
-              const restaurant = restaurants.find(
-                (obj, index) => obj["id"] === index + 1
-              );
-              if (restaurant) {
-                // Got the restaurant
-                callback(null, restaurant);
-              } else {
-                // Restaurant does not exist in the database
-                callback("Restaurant does not exist", null);
-              }
+              // Restaurant does not exist in the database
+              callback("Restaurant does not exist", null);
             }
-          });
-        }
-      })
-      .catch(err => {
-        callback(err, null);
-      });
+          }
+        });
+      }
+    });
   }
 
   /**
