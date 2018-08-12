@@ -23,11 +23,10 @@ class DBHelper {
   // add restaurants to opened IDB
   static addRest() {
     dbPromise = DBHelper.openDb();
-    console.log(dbPromise);
     fetch(DBHelper.DATABASE_URL)
       .then(res => res.json())
       .then(restaurants => {
-        console.log(dbPromise);
+        console.log("Pulling data for restaurants");
         dbPromise.then(db => {
           let tx = db.transaction("restaurants", "readwrite");
           let store = tx.objectStore("restaurants");
@@ -41,7 +40,6 @@ class DBHelper {
         dbPromise.then(db => {
           let tx = db.transaction("restaurants");
           let store = tx.objectStore("restaurants");
-          console.log(store.getAll());
           return store.getAll();
         });
       });
@@ -63,17 +61,17 @@ class DBHelper {
       });
   }
 
-  // get values for store
-  static getAll() {
-    dbPromise
-      .then(db => {
-        return db
-          .transaction("restaurants")
-          .objectStore("restaurants")
-          .getAll();
-      })
-      .then(restaurants => console.log(restaurants));
-  }
+  // // get values for store
+  // static getAll() {
+  //   dbPromise
+  //     .then(db => {
+  //       return db
+  //         .transaction("restaurants")
+  //         .objectStore("restaurants")
+  //         .getAll();
+  //     })
+  //     .then(restaurants => console.log(restaurants));
+  // }
 
   /**
    * Fetch all restaurants.
@@ -81,7 +79,7 @@ class DBHelper {
   static fetchRestaurants(callback) {
     // callback will get instance of restaurants
     DBHelper.addRest(callback);
-    console.log(restaurants);
+
     // if no restaurants fetch from server
     if (!restaurants) {
       fetch(DBHelper.DATABASE_URL)

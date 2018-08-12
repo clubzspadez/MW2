@@ -21,9 +21,11 @@ const urlsToCache = [
   "./img/8.jpg",
   "./img/9.jpg",
   "./img/10.jpg",
+  "./sw.js",
   "./js/dbhelper.js",
   "./js/main.js",
   "./js/idb.js",
+  "./js/serviceWorkerReg.js",
   "./js/restaurant_info.js",
   "./dist/js/",
   "./dist/js/index.min.js",
@@ -50,24 +52,22 @@ self.addEventListener("install", function(event) {
 });
 
 // remove outdated caches
-self.addEventListener("activate", event => {
+self.addEventListener("activate", function(event) {
   event.waitUntil(
-    caches.keys().then(list => {
+    caches.keys().then(cache => {
       return Promise.all(
-        list.map(key => {
-          if (key !== cache_name) {
-            return caches.delete(key);
-          }
-        })
+        cache
+          .filter(spec => {
+            return spec.startsWith("restaurant-") && spec != urlsToCache;
+          })
+          .map(cache => {
+            return caches.delete(cache);
+          })
       );
     })
   );
-  return self.clients.claim();
 });
-
 self.addEventListener("fetch", function(event) {
-  // responde to fetch event
-  const url = new URL(event.request.url).host;
   // console.log(event.request.url);
   // const pathName = url.pathname("/restaurants");
   if (event.request.method != "GET") return;
@@ -75,15 +75,8 @@ self.addEventListener("fetch", function(event) {
   // with the current fetch event respond with
   // response
   event.respondWith(
-    caches.open(cache_name).then(cache => {
-      return cache.match(event.request).then(res => {
-        if (res) {
-          console.log(res);
-          return res;
-        } else {
-          return fetch(event.request);
-        }
-      });
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
     })
   );
 });
