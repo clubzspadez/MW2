@@ -75,20 +75,6 @@
   <!-- End footer -->
 
   <!-- Beginning scripts -->
-  <script>
-    registerWorker = () => {
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("/sw.js")
-          .then(registration => {
-            console.log("Registration successful, scope is:", registration.scope);
-          })
-          .catch(err => {
-            console.log("Service worker registration failed, error: ", err);
-          });
-      }
-    }
-  </script>
 
   <script type="application/javascript" charset="utf-8" src="./js/idb.js"></script>
   <!-- Database helpers -->

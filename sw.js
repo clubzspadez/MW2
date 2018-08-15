@@ -2,7 +2,7 @@
  * ! Cache version 3
  *
  */
-const cache_version = 3;
+const cache_version = 4;
 const cache_name = `restaurant-v${cache_version}`;
 const urlsToCache = [
   "./",
@@ -51,32 +51,32 @@ self.addEventListener("install", function(event) {
   );
 });
 
-// remove outdated caches
-self.addEventListener("activate", function(event) {
+self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(cache => {
+    caches.keys().then(specCa => {
       return Promise.all(
-        cache
-          .filter(spec => {
-            return spec.startsWith("restaurant-") && spec != urlsToCache;
+        specCa
+          .filter(cachesName => {
+            return (
+              cachesName.startsWith("restaurants-") && cachesName != urlsToCache
+            );
           })
-          .map(cache => {
-            return caches.delete(cache);
+          .map(cachesName => {
+            // remove outdated caches
+            return caches.delete(cachesName);
           })
       );
     })
   );
 });
-self.addEventListener("fetch", function(event) {
-  // console.log(event.request.url);
-  // const pathName = url.pathname("/restaurants");
-  if (event.request.method != "GET") return;
 
-  // with the current fetch event respond with
-  // response
+self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+    caches.open(cache_name).then(cache => {
+      return cache.match(event.request).then(response => {
+        if (response) return response;
+        return fetch(event.request);
+      });
     })
   );
 });

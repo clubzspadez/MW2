@@ -1,7 +1,7 @@
 /**
  * Common database helper functions.
  */
-var dbPromise;
+let dbPromise;
 class DBHelper {
   /**
    * Database URL.
@@ -21,12 +21,13 @@ class DBHelper {
   }
 
   // add restaurants to opened IDB
-  static addRest() {
+  static addRest(callback) {
     dbPromise = DBHelper.openDb();
     fetch(DBHelper.DATABASE_URL)
       .then(res => res.json())
       .then(restaurants => {
         console.log("Pulling data for restaurants");
+        console.log(restaurants);
         dbPromise.then(db => {
           let tx = db.transaction("restaurants", "readwrite");
           let store = tx.objectStore("restaurants");
@@ -34,15 +35,21 @@ class DBHelper {
             store.put(restaurant);
           });
         });
-        callback(null, restaurants);
       })
       .catch(err => {
-        dbPromise.then(db => {
-          let tx = db.transaction("restaurants");
-          let store = tx.objectStore("restaurants");
-          return store.getAll();
-        });
+        console.log(err);
+        // data.then(data => {
+        //   DBHelper.fetchRestaurants(null, data);
+        // });
       });
+
+    return dbPromise.then(db =>
+      db
+        .transaction("restaurants")
+        .objectStore("restaurants")
+        .getAll()
+        .then(restaurants => restaurants)
+    );
   }
 
   // get specific restaurant
@@ -54,6 +61,7 @@ class DBHelper {
         return store.get(parseInt(id));
       })
       .then(restaurantObject => {
+        console.log(restaurantObject);
         return restaurantObject;
       })
       .catch(function(e) {
@@ -61,27 +69,30 @@ class DBHelper {
       });
   }
 
-  // // get values for store
-  // static getAll() {
-  //   dbPromise
-  //     .then(db => {
-  //       return db
-  //         .transaction("restaurants")
-  //         .objectStore("restaurants")
-  //         .getAll();
-  //     })
-  //     .then(restaurants => console.log(restaurants));
-  // }
-
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
+    // if (restData) {
+    //   callback(null, restData);
+    // }
     // callback will get instance of restaurants
-    DBHelper.addRest(callback);
+    // console.log(restData);
+    let restData = DBHelper.addRest();
+
+    restData
+      .then(data => {
+        console.log(data);
+        const restaurants = data;
+        callback(null, restaurants);
+      })
+      .catch(err => {
+        callback(err, null);
+        console.log(`Fetch Error: ${err}`);
+      });
 
     // if no restaurants fetch from server
-    if (!restaurants) {
+    if (!restData) {
       fetch(DBHelper.DATABASE_URL)
         .then(res => {
           return res.json();
